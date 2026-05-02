@@ -50,6 +50,31 @@ This allows:
 - Scheduler automatically places pods on nodes that have the requested NIC
 - Handles heterogeneous configurations (different NICs online per node)
 
+## DOCA Driver Version Override
+
+By default, the OFED/DOCA driver version is auto-discovered from the NVIDIA Network Operator's `ClusterServiceVersion` (CSV). To pin a specific version — or use a custom image/repository — set the environment variables in `00-version-discovery-job.yaml`:
+
+```yaml
+env:
+- name: OFED_VERSION_OVERRIDE
+  value: "doca3.2.2-25.10-2.4.1.0-4"
+- name: OFED_IMAGE_OVERRIDE
+  value: ""
+- name: OFED_REPO_OVERRIDE
+  value: ""
+```
+
+| Variable | Default (when empty) | Description |
+|---|---|---|
+| `OFED_VERSION_OVERRIDE` | Auto-discovered from operator CSV | DOCA driver version tag |
+| `OFED_IMAGE_OVERRIDE` | `doca-driver` | Image name (not discovered, hardcoded default) |
+| `OFED_REPO_OVERRIDE` | `nvcr.io/nvidia/mellanox` | Image repository (not discovered, hardcoded default) |
+
+**Notes:**
+- Only the **version** is discovered from the CSV. The image name and repository are always hardcoded defaults unless overridden.
+- When `OFED_VERSION_OVERRIDE` is set, the job skips the CSV lookup entirely and uses the provided version.
+- After changing any value, sync the ArgoCD app — the job runs as a Sync hook and picks up changes on the next sync.
+
 ## Components
 
 ### 1. RDMA Configuration Generator (job-generate-rdma-config.yaml)
@@ -166,6 +191,9 @@ Disconnected or down NICs are automatically excluded.
 
 ## Files
 
+- `00-version-discovery-job.yaml`: OFED/DOCA version discovery and NicClusterPolicy creation
+  - Auto-discovers driver version from operator CSV, or uses `OFED_VERSION_OVERRIDE`
+  - Supports custom image/repo via `OFED_IMAGE_OVERRIDE` / `OFED_REPO_OVERRIDE`
 - `job-generate-rdma-config.yaml`: RDMA configuration generator
   - ServiceAccount, ClusterRole, ClusterRoleBinding
   - ConfigMap with Python generator script

@@ -28,6 +28,11 @@ spec:
   # Note: ofedDriver configuration is managed dynamically by the discover-ofed-version
   # hook Job, which discovers the correct driver version from the NVIDIA Network Operator
   # deployment. This ensures the MOFED driver version always matches the operator's default.
+  # To pin a specific DOCA driver version, image, or repository, set these
+  # env vars in 00-version-discovery-job.yaml:
+  #   OFED_VERSION_OVERRIDE  (e.g. "doca3.2.2-25.10-2.4.1.0-4")
+  #   OFED_IMAGE_OVERRIDE    (e.g. "doca-driver", default: "doca-driver")
+  #   OFED_REPO_OVERRIDE     (e.g. "nvcr.io/nvidia/mellanox", default: "nvcr.io/nvidia/mellanox")
   #
   # SR-IOV Device Plugin configuration is also generated dynamically by the NIC Discovery
   # process (manifests/35-nic-discovery) based on actual hardware present in the cluster.

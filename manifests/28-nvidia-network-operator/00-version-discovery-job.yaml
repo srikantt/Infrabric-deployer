@@ -52,42 +52,58 @@ spec:
       containers:
       - name: version-discoverer
         image: registry.redhat.io/openshift4/ose-cli:latest
+        env:
+        - name: OFED_VERSION_OVERRIDE
+          value: ""
+        - name: OFED_IMAGE_OVERRIDE
+          value: ""
+        - name: OFED_REPO_OVERRIDE
+          value: ""
         command:
         - /bin/bash
         - -c
         - |
           set -e
 
-          echo "Discovering NVIDIA Network Operator default OFED version..."
+          if [ -n "$OFED_VERSION_OVERRIDE" ]; then
+            echo "Using user-specified OFED version: $OFED_VERSION_OVERRIDE"
+            VERSION="$OFED_VERSION_OVERRIDE"
+          else
+            echo "Discovering NVIDIA Network Operator default OFED version..."
 
-          # Wait for operator ClusterServiceVersion to exist
-          timeout=60
-          while [ $timeout -gt 0 ]; do
-            CSV_NAME=$(oc get csv -n nvidia-network-operator -o name 2>/dev/null | grep nvidia-network-operator || echo "")
-            if [ -n "$CSV_NAME" ]; then
-              echo "Operator CSV found: $CSV_NAME"
-              break
+            # Wait for operator ClusterServiceVersion to exist
+            timeout=60
+            while [ $timeout -gt 0 ]; do
+              CSV_NAME=$(oc get csv -n nvidia-network-operator -o name 2>/dev/null | grep nvidia-network-operator || echo "")
+              if [ -n "$CSV_NAME" ]; then
+                echo "Operator CSV found: $CSV_NAME"
+                break
+              fi
+              echo "Waiting for operator CSV... ($timeout seconds left)"
+              sleep 5
+              timeout=$((timeout - 5))
+            done
+
+            if [ -z "$CSV_NAME" ]; then
+              echo "ERROR: Could not find NVIDIA Network Operator CSV"
+              exit 1
             fi
-            echo "Waiting for operator CSV... ($timeout seconds left)"
-            sleep 5
-            timeout=$((timeout - 5))
-          done
 
-          if [ -z "$CSV_NAME" ]; then
-            echo "ERROR: Could not find NVIDIA Network Operator CSV"
-            exit 1
+            # Extract default OFED version from CSV alm-examples using Python
+            VERSION=$(oc get $CSV_NAME -n nvidia-network-operator -o jsonpath='{.metadata.annotations.alm-examples}' | \
+              python3 -c "import json,sys;examples=json.load(sys.stdin);print([item.get('spec',{}).get('ofedDriver',{}).get('version','') for item in examples if item.get('kind')=='NicClusterPolicy'][0])" 2>&1)
+
+            if [ -z "$VERSION" ] || [ "$VERSION" = "None" ]; then
+              echo "ERROR: Could not discover OFED version from operator CSV"
+              exit 1
+            fi
+
+            echo "Discovered OFED version: $VERSION"
           fi
 
-          # Extract default OFED version from CSV alm-examples using Python
-          VERSION=$(oc get $CSV_NAME -n nvidia-network-operator -o jsonpath='{.metadata.annotations.alm-examples}' | \
-            python3 -c "import json,sys;examples=json.load(sys.stdin);print([item.get('spec',{}).get('ofedDriver',{}).get('version','') for item in examples if item.get('kind')=='NicClusterPolicy'][0])" 2>&1)
-
-          if [ -z "$VERSION" ] || [ "$VERSION" = "None" ]; then
-            echo "ERROR: Could not discover OFED version from operator CSV"
-            exit 1
-          fi
-          
-          echo "Discovered OFED version: $VERSION"
+          OFED_IMAGE="${OFED_IMAGE_OVERRIDE:-doca-driver}"
+          OFED_REPO="${OFED_REPO_OVERRIDE:-nvcr.io/nvidia/mellanox}"
+          echo "Using image: $OFED_REPO/$OFED_IMAGE:$VERSION"
 
           # Check if NicClusterPolicy already exists with this version
           EXISTING_VERSION=$(oc get nicclusterpolicy nic-cluster-policy -n nvidia-network-operator \
@@ -121,8 +137,8 @@ spec:
                   - key: node-role.kubernetes.io/master
                     operator: DoesNotExist
             ofedDriver:
-              image: doca-driver
-              repository: nvcr.io/nvidia/mellanox
+              image: $OFED_IMAGE
+              repository: $OFED_REPO
               version: $VERSION
               env:
                 - name: UNLOAD_STORAGE_MODULES
