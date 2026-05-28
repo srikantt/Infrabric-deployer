@@ -98,6 +98,8 @@ spec:
               else
                 echo "  - Labeling $node"
                 oc label node $node fab-rig-deployer=true --overwrite
+                oc label node $node network.nvidia.com/operator.mofed.wait=false --overwrite
+                oc label node $node network.nvidia.com/operator.nic-configuration.wait=false --overwrite
                 # Verify label was applied
                 if ! oc get node $node -o jsonpath='{.metadata.labels.fab-rig-deployer}' | grep -q "true"; then
                   echo "ERROR: Failed to label $node"
