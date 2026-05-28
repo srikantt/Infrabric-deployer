@@ -54,11 +54,11 @@ spec:
         image: registry.redhat.io/openshift4/ose-cli:latest
         env:
         - name: OFED_VERSION_OVERRIDE
-          value: ""
+          value: "doca3.3.0-26.01-1.0.0.0-0"
         - name: OFED_IMAGE_OVERRIDE
-          value: ""
+          value: "doca-driver"
         - name: OFED_REPO_OVERRIDE
-          value: ""
+          value: "nvcr.io/nvidia/mellanox"
         command:
         - /bin/bash
         - -c
