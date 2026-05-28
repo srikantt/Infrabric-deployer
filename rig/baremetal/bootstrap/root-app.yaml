@@ -14,7 +14,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: rig/baremetal
-    repoURL: https://github.com/bbenshab/Infrabric-deployer.git
+    repoURL: https://github.com/srikantt/Infrabric-deployer.git
     targetRevision: main
     kustomize:
        patches:
@@ -27,7 +27,7 @@ spec:
            patch: |-
              - op: replace
                path: /spec/source/repoURL
-               value: https://github.com/bbenshab/Infrabric-deployer.git
+               value: https://github.com/srikantt/Infrabric-deployer.git
   sources: []
   project: default
   syncPolicy:

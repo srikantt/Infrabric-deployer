@@ -84,7 +84,7 @@ curl -I https://github.com/YOUR_USERNAME/fab-rig
    ```yaml
    stringData:
      type: git
-     url: https://github.com/bbenshab/Infrabric-deployer.git
+     url: https://github.com/srikantt/Infrabric-deployer.git
      username: bbenshab
      password: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```

@@ -29,7 +29,7 @@ spec:
         maxDuration: 5m0s
         factor: 2
   source:
-    repoURL: https://github.com/bbenshab/Infrabric-deployer.git
+    repoURL: https://github.com/srikantt/Infrabric-deployer.git
     targetRevision: main
     path: manifests/20-operators
     helm:

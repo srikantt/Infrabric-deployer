@@ -16,7 +16,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: manifests/15-nfd
-    repoURL: https://github.com/bbenshab/Infrabric-deployer.git
+    repoURL: https://github.com/srikantt/Infrabric-deployer.git
     targetRevision: main
   sources: []
   project: default
