@@ -18,15 +18,15 @@ spec:
         runAsUser: 0
       containers:
         - name: generator
-          image: registry.access.redhat.com/ubi9/ubi:latest
+          image: registry.redhat.io/openshift4/ose-cli-rhel9:latest
           command:
             - /bin/bash
             - -c
             - |
-              dnf install -y wget tar gzip python3 && \
-              wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz && \
-              tar -xzf openshift-client-linux.tar.gz -C /usr/local/bin/ oc kubectl && \
-              rm openshift-client-linux.tar.gz && \
+              # dnf install -y wget tar gzip python3 && \
+              # wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz && \
+              # tar -xzf openshift-client-linux.tar.gz -C /usr/local/bin/ oc kubectl && \
+              # rm openshift-client-linux.tar.gz && \
               /bin/bash /scripts/generate-nic-resources.sh
           env:
             # ==================================================================================
