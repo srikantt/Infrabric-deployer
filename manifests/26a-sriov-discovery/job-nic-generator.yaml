@@ -54,8 +54,8 @@ metadata:
   namespace: default
   annotations:
     argocd.argoproj.io/sync-wave: "26"
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 300  # Auto-delete 5 minutes after completion
